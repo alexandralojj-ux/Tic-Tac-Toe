@@ -42,10 +42,10 @@ const Game = (() => {
         gameOver = false;
     }
 
-    const player1 = createPlayer("Alex", "X");
-    const player2 = createPlayer("Maria", "O");
+    let player1;
+    let player2;
 
-    let currentPlayer = player1;
+    let currentPlayer;
     let gameOver = false;
 
     const winningCombinations = [
@@ -59,14 +59,24 @@ const Game = (() => {
         [2, 4, 6]
     ];
 
+    function startGame(player1Name, player2Name) {
+        player1 = createPlayer(player1Name, "X");
+        player2 = createPlayer(player2Name, "O");
+
+        currentPlayer = player1;
+        gameOver = false;
+
+        return `${currentPlayer.name}'s turn (${currentPlayer.marker})`;
+    }
+
     function checkWinner() {
         for (const combination of winningCombinations) {
             const [a, b, c] = combination;
 
         if (
-            Gameboard.board()[a] !== "" &&
-            Gameboard.board()[a] === Gameboard.board[b] &&
-            Gameboard.board()[a] === Gameboard.board[c]
+            Gameboard.getBoard()[a] !== "" &&
+            Gameboard.getBoard()[a] === Gameboard.getBoard[b] &&
+            Gameboard.getBoard()[a] === Gameboard.getBoard[c]
         ) {
             return true;
             }
@@ -90,6 +100,10 @@ const Game = (() => {
     }
 
     function playTurn(position) {
+        if (!currentPlayer) {
+            return;
+        }
+
         if (gameOver) {
             return;
         }
@@ -97,29 +111,56 @@ const Game = (() => {
         Gameboard.placeMarker(position, currentPlayer.marker);
 
         if (checkWinner()) {
-            console.log(`${currentPlayer.name} wins!`);
             gameOver = true;
-            return;
+            return `${currentPlayer.name} wins!`;
         }
 
         if (checkTie()) {
-            console.log("It's a tie!");
             gameOver = true;
-            return;
+            return "It's a tie!";
         }
 
         switchPlayer();
+
+        return `${currentPlayer.name}'s turn (${currentPlayer.marker})`;
     }
 
     return {
         playTurn,
-        resetGame
+        resetGame,
+        startGame
     };
 })();
 
 const displayController = (() => {
 
     const gameboardElement = document.querySelector("#gameboard");
+    const gameMessage = document.querySelector("#game-message");
+    const restartButton = document.querySelector("#restart-button");
+    const startButton = document.querySelector("#start-button");
+
+    startButton.addEventListener("click", function() {
+        const player1Name = document.querySelector("#player1-name").value;
+        const player2Name = document.querySelector("#player2-name").value;
+
+        if (player1Name === "" || player2Name === "") {
+            return;
+        }
+
+        const message = Game.startGame(player1Name, player2Name);
+        gameMessage.textContent = message;
+        render();
+    });
+
+    restartButton.addEventListener("click", function() {
+        Game.resetGame();
+        gameMessage.textContent = "";
+        render();
+    });
+
+    function showMessage(message) {
+        gameMessage.textContent = message;
+    }
 
     function render() {
         gameboardElement.innerHTML = "";
@@ -133,7 +174,12 @@ const displayController = (() => {
             cellElement.dataset.index = index;
 
             cellElement.addEventListener("click", function() {
-                Game.playTurn(index);
+                const message = Game.playTurn(index);
+
+                if (message) {
+                    showMessage(message);
+                }
+
                 render();
             });
 
@@ -145,6 +191,4 @@ const displayController = (() => {
         render
     };
 })();
-
-displayController.render();
 
