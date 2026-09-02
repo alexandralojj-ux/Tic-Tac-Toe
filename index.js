@@ -1,7 +1,7 @@
 /* tabla de joc */
 
 const Gameboard = (() => {
-    const board = ["", "", "", "", "", "", "", "", ""];
+    const board = ["", "", "", "", "", "", "", "", ""]
 
     function placeMarker(position, marker) {
         if (board[position] === "") {
@@ -75,8 +75,8 @@ const Game = (() => {
 
         if (
             Gameboard.getBoard()[a] !== "" &&
-            Gameboard.getBoard()[a] === Gameboard.getBoard[b] &&
-            Gameboard.getBoard()[a] === Gameboard.getBoard[c]
+            Gameboard.getBoard()[a] === Gameboard.getBoard()[b] &&
+            Gameboard.getBoard()[a] === Gameboard.getBoard()[c]
         ) {
             return true;
             }
